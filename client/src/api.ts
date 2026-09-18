@@ -13,6 +13,9 @@ export async function api(
     method,
     headers: opts.body !== undefined ? { "Content-Type": "application/json" } : undefined,
     body: opts.body !== undefined ? JSON.stringify(opts.body) : undefined,
+    // corta a espera em 20s — sem isso, um servidor lento/travado deixa o
+    // botão em "Enviando…" pra sempre, sem nenhum aviso pro usuário.
+    signal: AbortSignal.timeout(20000),
   });
   let data: any = {};
   try {

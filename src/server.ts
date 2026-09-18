@@ -150,7 +150,11 @@ async function emitirCodigoLogin(usuario: {
     expiraEm: agora + CODIGO_TTL_SEG,
     tentativas: 0,
   } as any);
-  await enviarCodigoLogin(usuario.email, usuario.nome, codigo);
+  // Não espera o e-mail sair pra responder: se o SMTP ficar lento/travado
+  // (comum em alguns hosts), o login não pode ficar preso esperando.
+  enviarCodigoLogin(usuario.email, usuario.nome, codigo).catch((err) => {
+    console.error("[email] falha ao enviar código de login:", err);
+  });
 }
 
 app.post("/api/login", async (req, res) => {

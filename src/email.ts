@@ -30,6 +30,11 @@ const transporter = emailConfigurado
       port: Number(SMTP_PORT ?? 587),
       secure: Number(SMTP_PORT ?? 587) === 465,
       auth: { user: SMTP_USER!, pass: SMTP_PASS! },
+      // limites curtos — em alguns hosts a conexão SMTP fica pendurada em vez
+      // de dar erro; sem isso o envio (e quem espera por ele) trava.
+      connectionTimeout: 8000,
+      greetingTimeout: 8000,
+      socketTimeout: 8000,
     })
   : null;
 
