@@ -1,0 +1,138 @@
+// use prisma-next
+
+model Empresa {
+  idEmpresa Int @id @default(autoincrement()) @map("id_empresa")
+  nome      VarChar(150)
+  cnpj      VarChar(18) @unique
+  telefone  VarChar(20)?
+  email     VarChar(150)?
+
+  usuarios Usuario[]
+  imoveis  Imovel[]
+
+  @@map("empresa")
+}
+
+enum TipoUsuario {
+  @@type("pg/text@1")
+  ADMIN               = "ADMIN"
+  CORRETOR            = "CORRETOR"
+  CORRETOR_INDIVIDUAL = "CORRETOR_INDIVIDUAL"
+}
+
+model Usuario {
+  idUsuario Int @id @default(autoincrement()) @map("id_usuario")
+  nome      VarChar(150)
+  email     VarChar(150) @unique
+  cpf       VarChar(11)? @unique
+  cnpj      VarChar(18)? @unique
+  telefone  VarChar(20)?
+  senha     VarChar(255)
+  dataNasc  Date? @map("data_nasc")
+  instagram VarChar(30)?
+  foto      VarChar(200)?
+  empresaId Int? @map("id_empresa")
+  tipoUsuario TipoUsuario @map("tipo_usuario")
+
+  empresa        Empresa? @relation(fields: [empresaId], references: [idEmpresa])
+  imoveis        Imovel[] @relation("ImovelDono")
+  imoveisCriados Imovel[] @relation("ImovelCriador")
+  loginCodigos   LoginCodigo[]
+
+  // ADMIN e CORRETOR exigem empresa; CORRETOR_INDIVIDUAL nunca tem empresa.
+  @@check(
+    expression: "(tipo_usuario = 'CORRETOR_INDIVIDUAL' AND id_empresa IS NULL) OR (tipo_usuario IN ('ADMIN','CORRETOR') AND id_empresa IS NOT NULL)",
+    name: "usuario_empresa_por_tipo"
+  )
+  // No máximo um ADMIN por imobiliária.
+  @@index([empresaId], unique: true, where: "(tipo_usuario = 'ADMIN')", name: "usuario_um_admin_por_empresa")
+  @@index([empresaId], name: "usuario_id_empresa_idx")
+  @@map("usuario")
+}
+
+// Código de 6 dígitos enviado por e-mail para confirmar o login (2FA).
+model LoginCodigo {
+  idCodigo   Int @id @default(autoincrement()) @map("id_codigo")
+  usuarioId  Int @map("id_usuario")
+  codigoHash VarChar(64) @map("codigo_hash")
+  expiraEm   Int @map("expira_em")
+  tentativas Int @default(0)
+
+  usuario Usuario @relation(fields: [usuarioId], references: [idUsuario], onDelete: Cascade)
+
+  @@index([usuarioId], name: "login_codigo_id_usuario_idx")
+  @@map("login_codigo")
+}
+
+model Bairro {
+  idBairro Int @id @default(autoincrement()) @map("id_bairro")
+  nome     VarChar(50)
+
+  imoveis  Imovel[]
+
+  @@map("bairro")
+}
+
+model Imovel {
+  idImovel   Int @id @default(autoincrement()) @map("id_imovel")
+  valor      Decimal
+  cliente    VarChar(100)?
+  telefone   VarChar(20)?
+  dataCapt   Date? @map("data_capt")
+  referencia VarChar(200)?
+  rua        VarChar(150)?
+  numero     VarChar(20)?
+  descricao  VarChar(2000)?
+  status     VarChar(30)?
+  usuarioId  Int? @map("id_usuario")
+  empresaId  Int? @map("id_empresa")
+  criadoPorId Int? @map("criado_por")
+  bairroId   Int? @map("id_bairro")
+
+  usuario      Usuario? @relation("ImovelDono", fields: [usuarioId], references: [idUsuario])
+  criadoPor    Usuario? @relation("ImovelCriador", fields: [criadoPorId], references: [idUsuario])
+  empresa      Empresa? @relation(fields: [empresaId], references: [idEmpresa])
+  bairro       Bairro? @relation(fields: [bairroId], references: [idBairro])
+  caracteristicas ImovelCaracteristica[]
+  fotos           ImovelFoto[]
+
+  // Todo imóvel tem posse: da imobiliária, de um corretor, ou ambos.
+  @@check(expression: "(id_empresa IS NOT NULL OR id_usuario IS NOT NULL)", name: "imovel_tem_posse")
+  @@map("imovel")
+}
+
+model ImovelFoto {
+  idFoto   Int @id @default(autoincrement()) @map("id_foto")
+  imovelId Int @map("id_imovel")
+  arquivo  VarChar(200)
+  largura  Int
+  altura   Int
+  bytes    Int
+  ordem    Int @default(0)
+
+  imovel Imovel @relation(fields: [imovelId], references: [idImovel], onDelete: Cascade)
+
+  @@index([imovelId], name: "imovel_foto_id_imovel_idx")
+  @@map("imovel_foto")
+}
+
+model Caracteristica {
+  idCaracteristica Int @id @default(autoincrement()) @map("id_caracteristicas")
+  descricao        VarChar(100)?
+
+  imoveis ImovelCaracteristica[]
+
+  @@map("caracteristicas")
+}
+
+model ImovelCaracteristica {
+  quantidade       Int?
+  imovelId         Int @map("id_imovel")
+  caracteristicaId Int @map("id_caracteristicas")
+
+  imovel           Imovel @relation(fields: [imovelId], references: [idImovel])
+  caracteristica   Caracteristica @relation(fields: [caracteristicaId], references: [idCaracteristica])
+
+  @@id([imovelId, caracteristicaId])
+  @@map("IMCAR")
+}

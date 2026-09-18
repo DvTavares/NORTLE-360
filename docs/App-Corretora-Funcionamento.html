@@ -1,0 +1,495 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<title>App Corretora — Funcionamento</title>
+<style>
+  :root {
+    --fg: #16202b;
+    --muted: #5b6773;
+    --border: #d7dee6;
+    --bg-soft: #f4f7fa;
+    --brand: #1f6feb;
+    --ok: #1a7f4b;
+    --warn: #b45309;
+    --danger: #c0362c;
+    --mono: "SFMono-Regular", ui-monospace, "Cascadia Mono", "Consolas", monospace;
+  }
+
+  * { box-sizing: border-box; }
+
+  html { font-size: 10.5pt; }
+
+  body {
+    margin: 0;
+    color: var(--fg);
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    line-height: 1.5;
+  }
+
+  @page {
+    size: A4;
+    margin: 18mm 16mm;
+  }
+
+  h1, h2, h3 { line-height: 1.25; margin: 0; }
+  h1 { font-size: 22pt; letter-spacing: -0.01em; }
+  h2 {
+    font-size: 15pt;
+    margin-top: 26px;
+    padding-bottom: 5px;
+    border-bottom: 2px solid var(--brand);
+  }
+  h3 { font-size: 12pt; margin-top: 18px; color: #23303d; }
+  p { margin: 8px 0; }
+  ul, ol { margin: 8px 0; padding-left: 20px; }
+  li { margin: 3px 0; }
+
+  section { break-inside: avoid-page; }
+  h2 { break-after: avoid-page; }
+  h3 { break-after: avoid-page; }
+
+  code {
+    font-family: var(--mono);
+    font-size: 0.9em;
+    background: var(--bg-soft);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    padding: 0.5px 4px;
+  }
+
+  .cover {
+    padding: 40px 0 24px;
+    border-bottom: 3px solid var(--brand);
+    margin-bottom: 8px;
+  }
+  .cover .kicker {
+    font-size: 10pt;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--brand);
+    font-weight: 700;
+  }
+  .cover p { color: var(--muted); font-size: 11pt; max-width: 46em; }
+  .cover .meta { margin-top: 14px; font-size: 9.5pt; color: var(--muted); }
+
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 12px 0;
+    font-size: 9.5pt;
+  }
+  th, td {
+    border: 1px solid var(--border);
+    padding: 6px 9px;
+    text-align: left;
+    vertical-align: top;
+  }
+  th { background: var(--bg-soft); font-weight: 700; }
+  td code { background: #fff; }
+
+  .tag {
+    display: inline-block;
+    font-size: 8pt;
+    font-weight: 700;
+    padding: 1px 6px;
+    border-radius: 999px;
+    border: 1px solid currentColor;
+    vertical-align: middle;
+  }
+  .tag.get { color: #0369a1; }
+  .tag.post { color: var(--ok); }
+  .tag.put { color: var(--warn); }
+  .tag.patch { color: var(--warn); }
+  .tag.del { color: var(--danger); }
+  .tag.role { color: #6d28d9; }
+
+  .callout {
+    border: 1px solid var(--border);
+    border-left: 4px solid var(--brand);
+    background: var(--bg-soft);
+    border-radius: 6px;
+    padding: 10px 14px;
+    margin: 12px 0;
+    font-size: 9.5pt;
+  }
+  .callout.warn { border-left-color: var(--warn); }
+
+  /* passo-a-passo (fluxos) */
+  .flow { margin: 12px 0; counter-reset: step; }
+  .flow .step {
+    position: relative;
+    display: grid;
+    grid-template-columns: 26px 120px 1fr;
+    gap: 10px;
+    padding: 7px 0;
+    border-top: 1px solid var(--border);
+    font-size: 9.5pt;
+    break-inside: avoid;
+  }
+  .flow .step:first-of-type { border-top: 0; }
+  .flow .step::before {
+    counter-increment: step;
+    content: counter(step);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 22px; height: 22px;
+    border-radius: 50%;
+    background: var(--brand);
+    color: #fff;
+    font-weight: 700;
+    font-size: 9pt;
+  }
+  .flow .who {
+    font-weight: 700;
+    color: #23303d;
+    font-size: 8.5pt;
+    align-self: center;
+  }
+  .flow .who small { display: block; font-weight: 500; color: var(--muted); }
+  .flow .what { align-self: center; }
+  .flow .what code { font-size: 0.88em; }
+
+  .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+  .card {
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 12px 14px;
+    break-inside: avoid;
+  }
+  .card h3 { margin-top: 0; }
+
+  .muted { color: var(--muted); }
+  .small { font-size: 9pt; }
+  .nowrap { white-space: nowrap; }
+
+  .toc { font-size: 10pt; columns: 2; column-gap: 28px; }
+  .toc ol { padding-left: 18px; }
+
+  .kv { display: grid; grid-template-columns: max-content 1fr; gap: 3px 14px; font-size: 9.5pt; margin: 8px 0; }
+  .kv dt { color: var(--muted); }
+  .kv dd { margin: 0; }
+
+  .pagebreak { break-before: page; }
+</style>
+</head>
+<body>
+
+<div class="cover">
+  <div class="kicker">Documentação técnica</div>
+  <h1>App Corretora — Funcionamento da Aplicação</h1>
+  <p>Como a aplicação está estruturada hoje, com foco em <strong>login</strong> e <strong>cadastro</strong>:
+  os três perfis de usuário, os fluxos de autenticação e registro, e as regras que o banco de dados garante.</p>
+  <div class="meta">
+    Stack: React + Vite + TypeScript (SPA) · Express 5 + <code>tsx</code> (API REST) · PostgreSQL/Neon via Prisma&nbsp;Next (<code>@prisma/orm-postgres</code>)<br>
+    Gerado em 03/09/2026 · Branch <code>master</code>
+  </div>
+</div>
+
+<section>
+  <h2>Sumário</h2>
+  <div class="toc">
+    <ol>
+      <li>Visão geral</li>
+      <li>Perfis de usuário</li>
+      <li>Autenticação (login)</li>
+      <li>Cadastro — os três caminhos</li>
+      <li>Regras garantidas pelo banco</li>
+      <li>Modelo de dados e posse do imóvel</li>
+      <li>Referência da API</li>
+      <li>Como rodar e contas de teste</li>
+    </ol>
+  </div>
+</section>
+
+<section>
+  <h2>1. Visão geral</h2>
+  <p>A aplicação atende <strong>imobiliárias</strong> e <strong>corretores</strong>. Uma imobiliária se cadastra,
+  vira administradora da própria conta e cadastra seus corretores; cada corretor registra seus imóveis, e a
+  imobiliária também registra imóveis (próprios ou atribuídos a um corretor). Existe ainda o
+  <strong>corretor autônomo</strong>, sem vínculo com nenhuma imobiliária.</p>
+
+  <div class="grid2">
+    <div class="card">
+      <h3>Front-end — <code>client/</code></h3>
+      <ul class="small">
+        <li>SPA em React + Vite + TypeScript, com <code>react-router</code>.</li>
+        <li>Em dev: Vite na porta <code>5173</code> faz proxy de <code>/api</code> para a API na <code>3000</code>.</li>
+        <li>Em produção: <code>npm run build</code> gera <code>client/dist</code>, servido pelo próprio Express com fallback de SPA.</li>
+        <li>Estado de sessão no contexto <code>AuthProvider</code>; rotas protegidas por <code>RequireAuth</code> / <code>RequireAdmin</code>.</li>
+      </ul>
+    </div>
+    <div class="card">
+      <h3>Back-end — <code>src/</code></h3>
+      <ul class="small">
+        <li>Express 5 rodando com <code>tsx</code>. API REST sob <code>/api/*</code>.</li>
+        <li>Sessão = cookie <code>httpOnly</code> assinado com HMAC (<code>src/auth.ts</code>) — sem biblioteca de auth.</li>
+        <li>Senha com <code>scrypt</code> nativo do Node.</li>
+        <li>Acesso ao banco via <code>db.orm.public.&lt;Modelo&gt;</code> (Prisma Next).</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<section>
+  <h2>2. Perfis de usuário</h2>
+  <p>Todo mundo que faz login é uma linha na tabela <code>usuario</code>, diferenciada pela coluna
+  <code>tipo_usuario</code> (enum <code>TipoUsuario</code>). A imobiliária <em>não</em> tem login próprio:
+  ela é uma linha em <code>empresa</code> (dados/CNPJ) + uma linha <code>usuario</code> do tipo <code>ADMIN</code> ligada a ela.</p>
+
+  <table>
+    <thead>
+      <tr><th>Perfil</th><th>Como nasce</th><th>Vínculo com empresa</th><th>O que faz</th></tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><code>ADMIN</code><br><span class="small muted">a imobiliária</span></td>
+        <td>Cadastro público de imobiliária (cria <code>empresa</code> + este usuário)</td>
+        <td><strong>Obrigatório.</strong> No máximo <strong>1 ADMIN por imobiliária</strong>.</td>
+        <td>Cadastra e edita corretores; cadastra imóveis da imobiliária ou atribuídos a um corretor; vê todos os imóveis da empresa.</td>
+      </tr>
+      <tr>
+        <td><code>CORRETOR</code><br><span class="small muted">corretor da imobiliária</span></td>
+        <td>Criado pelo <code>ADMIN</code> já logado (não há auto-cadastro)</td>
+        <td><strong>Obrigatório</strong> — herda a empresa do ADMIN que o criou.</td>
+        <td>Cadastra, edita e exclui os <em>seus</em> imóveis. Vê só os seus.</td>
+      </tr>
+      <tr>
+        <td><code>CORRETOR_INDIVIDUAL</code><br><span class="small muted">corretor autônomo</span></td>
+        <td>Cadastro público (<code>/api/registrar</code>)</td>
+        <td><strong>Nunca.</strong> <code>id_empresa</code> fica <code>NULL</code>.</td>
+        <td>Cadastra, edita e exclui os seus imóveis. Vê só os seus.</td>
+      </tr>
+    </tbody>
+  </table>
+</section>
+
+<section class="pagebreak">
+  <h2>3. Autenticação (login)</h2>
+
+  <h3>3.1 Como a senha é guardada</h3>
+  <p>Ao cadastrar, a senha passa por <code>hashPassword()</code> e é gravada no formato
+  <code>scrypt$N$salt_hex$hash_hex</code> (parâmetro de custo <code>N = 16384</code>, chave de 32 bytes).
+  O texto puro nunca é armazenado. Na verificação, <code>verifyPassword()</code> reprocessa a senha informada
+  com o mesmo <em>salt</em> e compara em tempo constante (<code>timingSafeEqual</code>).</p>
+
+  <h3>3.2 Como a sessão funciona</h3>
+  <p>Não há sessão em servidor nem JWT de biblioteca. <code>createSession()</code> monta um token no estilo
+  &ldquo;JWT enxuto&rdquo;: <code>base64url(JSON) . HMAC&#8209;SHA256(SECRET, corpo)</code>. O corpo carrega
+  <code>sub</code> (id do usuário), <code>nome</code>, <code>email</code>, <code>tipoUsuario</code>,
+  <code>empresaId</code> e <code>exp</code>. Esse token vai num cookie:</p>
+  <dl class="kv">
+    <dt>Nome</dt><dd><code>corretora_session</code></dd>
+    <dt>Flags</dt><dd><code>HttpOnly</code>, <code>Path=/</code>, <code>SameSite=Lax</code>, <code>Max-Age</code> = 8&nbsp;horas; <code>Secure</code> quando <code>NODE_ENV=production</code></dd>
+    <dt>Validação</dt><dd>a cada requisição, <code>loadSession</code> confere a assinatura HMAC e a expiração; se falhar, <code>req.session</code> fica indefinido</dd>
+  </dl>
+  <div class="callout">
+    <strong>Autorização.</strong> <code>requireAuthApi</code> exige sessão válida (senão <code>401</code>).
+    <code>requireAdminApi</code> exige <code>tipoUsuario === "ADMIN"</code> com <code>empresaId</code> definido (senão <code>403</code>).
+    O <code>tipoUsuario</code> e o <code>empresaId</code> ficam <em>dentro</em> do token assinado — o cliente não consegue forjá-los.
+  </div>
+
+  <h3>3.3 Fluxo do login — <span class="tag post">POST</span> <code>/api/login</code></h3>
+  <div class="flow">
+    <div class="step"><div class="who">Usuário<small>tela /login</small></div><div class="what">Preenche e-mail e senha e envia o formulário.</div></div>
+    <div class="step"><div class="who">Front (SPA)</div><div class="what"><code>POST /api/login</code> com <code>{ email, senha }</code> em JSON.</div></div>
+    <div class="step"><div class="who">API</div><div class="what">Busca o usuário por e-mail. Se não existir, ainda roda um hash &ldquo;descartável&rdquo; para nivelar o tempo de resposta (evita enumeração por <em>timing</em>).</div></div>
+    <div class="step"><div class="who">API</div><div class="what"><code>verifyPassword()</code>. E-mail ou senha inválidos &rarr; <code>401 { error }</code>.</div></div>
+    <div class="step"><div class="who">API</div><div class="what">OK: <code>startSession()</code> grava o cookie <code>corretora_session</code> com <code>tipoUsuario</code> e <code>empresaId</code>. Responde <code>200 { ok: true }</code>.</div></div>
+    <div class="step"><div class="who">Front</div><div class="what"><code>refresh()</code> chama <code>GET /api/me</code>, guarda o usuário no contexto e navega para <code>/app</code>.</div></div>
+  </div>
+
+  <h3>3.4 Sessão no front</h3>
+  <ul class="small">
+    <li><code>AuthProvider</code> chama <code>GET /api/me</code> ao montar; enquanto isso, <code>loading = true</code>.</li>
+    <li><code>RequireAuth</code>: sem usuário &rarr; redireciona para <code>/login</code>.</li>
+    <li><code>RequireAdmin</code>: sem usuário &rarr; <code>/login</code>; usuário não-ADMIN &rarr; <code>/app</code>. Protege a rota <code>/corretores</code>.</li>
+    <li><code>logout()</code> &rarr; <code>POST /api/logout</code> (limpa o cookie) e zera o contexto.</li>
+  </ul>
+</section>
+
+<section class="pagebreak">
+  <h2>4. Cadastro — os três caminhos</h2>
+  <p>A decisão de projeto foi <strong>endpoints separados</strong>. A tela <code>/registro</code> tem um seletor
+  &ldquo;Corretor autônomo&rdquo; / &ldquo;Imobiliária&rdquo; que troca os campos e o endpoint. O cadastro de
+  <em>corretor da imobiliária</em> não é auto-serviço: acontece dentro do painel, com o ADMIN logado.</p>
+
+  <table>
+    <thead>
+      <tr><th>Caminho</th><th>Endpoint</th><th>Quem chama</th><th>Cria</th><th>Abre sessão?</th></tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>Corretor autônomo</td>
+        <td><span class="tag post">POST</span> <code>/api/registrar</code></td>
+        <td>Visitante (público)</td>
+        <td>1 <code>usuario</code> <code>CORRETOR_INDIVIDUAL</code>, <code>id_empresa = NULL</code></td>
+        <td><strong>Sim</strong> — já entra logado</td>
+      </tr>
+      <tr>
+        <td>Imobiliária + admin</td>
+        <td><span class="tag post">POST</span> <code>/api/registrar-imobiliaria</code></td>
+        <td>Visitante (público)</td>
+        <td>1 <code>empresa</code> + 1 <code>usuario</code> <code>ADMIN</code> ligado a ela (transação)</td>
+        <td><strong>Sim</strong> — entra logado como ADMIN</td>
+      </tr>
+      <tr>
+        <td>Corretor da imobiliária</td>
+        <td><span class="tag post">POST</span> <code>/api/corretores</code> <span class="tag role">ADMIN</span></td>
+        <td>ADMIN logado (painel)</td>
+        <td>1 <code>usuario</code> <code>CORRETOR</code> na empresa do ADMIN</td>
+        <td><strong>Não</strong> — o ADMIN continua na própria sessão</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <h3>4.1 Corretor autônomo — <code>/api/registrar</code></h3>
+  <div class="flow">
+    <div class="step"><div class="who">Visitante<small>/registro · aba &ldquo;Corretor autônomo&rdquo;</small></div><div class="what">Informa nome, e-mail e senha (mín. 6 caracteres).</div></div>
+    <div class="step"><div class="who">Front</div><div class="what"><code>POST /api/registrar</code> com <code>{ nome, email, senha }</code>.</div></div>
+    <div class="step"><div class="who">API</div><div class="what">Valida os campos. E-mail já usado &rarr; <code>409</code>.</div></div>
+    <div class="step"><div class="who">API</div><div class="what">Cria <code>usuario</code> com <code>tipoUsuario: "CORRETOR_INDIVIDUAL"</code> e <code>empresaId: null</code>; senha via <code>hashPassword()</code>.</div></div>
+    <div class="step"><div class="who">API</div><div class="what"><code>startSession()</code> &rarr; cookie. Responde <code>201 { ok: true }</code>.</div></div>
+    <div class="step"><div class="who">Front</div><div class="what"><code>refresh()</code> + navega para <code>/app</code>.</div></div>
+  </div>
+
+  <h3>4.2 Imobiliária + ADMIN — <code>/api/registrar-imobiliaria</code></h3>
+  <div class="flow">
+    <div class="step"><div class="who">Visitante<small>/registro · aba &ldquo;Imobiliária&rdquo;</small></div><div class="what">Informa nome e CNPJ da imobiliária, telefone (opcional) e os dados do administrador (nome, e-mail, senha).</div></div>
+    <div class="step"><div class="who">Front</div><div class="what"><code>POST /api/registrar-imobiliaria</code> com <code>{ nome, email, senha, empresaNome, cnpj, empresaTelefone }</code>.</div></div>
+    <div class="step"><div class="who">API</div><div class="what">Valida. E-mail já usado &rarr; <code>409</code>. CNPJ já cadastrado &rarr; <code>409</code>.</div></div>
+    <div class="step"><div class="who">API</div><div class="what"><strong>Transação:</strong> cria <code>empresa</code> (nome, CNPJ, telefone, e-mail) e, em seguida, <code>usuario</code> <code>ADMIN</code> com <code>empresaId</code> apontando para ela. Se qualquer passo falhar, nada é gravado.</div></div>
+    <div class="step"><div class="who">API</div><div class="what"><code>startSession()</code> como ADMIN. Responde <code>201 { ok: true }</code>.</div></div>
+    <div class="step"><div class="who">Front</div><div class="what">Entra no painel; a seção &ldquo;Corretores&rdquo; e o menu do ADMIN aparecem.</div></div>
+  </div>
+
+  <h3>4.3 Corretor da imobiliária — <code>/api/corretores</code> <span class="tag role">ADMIN</span></h3>
+  <div class="flow">
+    <div class="step"><div class="who">ADMIN<small>painel /corretores</small></div><div class="what">Preenche nome, e-mail, senha e, opcionalmente, telefone e CPF do novo corretor.</div></div>
+    <div class="step"><div class="who">Front</div><div class="what"><code>POST /api/corretores</code> (cookie de sessão do ADMIN vai junto).</div></div>
+    <div class="step"><div class="who">API</div><div class="what"><code>requireAdminApi</code>: sessão precisa ser ADMIN com empresa &mdash; senão <code>403</code>.</div></div>
+    <div class="step"><div class="who">API</div><div class="what">Valida; e-mail já usado &rarr; <code>409</code>. Cria <code>usuario</code> <code>CORRETOR</code> com <code>empresaId</code> = empresa do ADMIN.</div></div>
+    <div class="step"><div class="who">API</div><div class="what">Responde <code>201 { ok: true, id }</code>. <strong>Não</strong> mexe na sessão do ADMIN.</div></div>
+    <div class="step"><div class="who">Corretor</div><div class="what">Passa a entrar normalmente pelo <code>/api/login</code> com o e-mail e a senha definidos pelo ADMIN.</div></div>
+  </div>
+
+  <div class="callout warn">
+    <strong>Edição e remoção de corretor</strong> (também só ADMIN, e só sobre corretores da própria empresa):
+    <code>PATCH /api/corretores/:id</code> altera nome, telefone e CPF (e-mail e senha não mudam por aqui).
+    <code>DELETE /api/corretores/:id</code> remove o corretor numa transação e, antes de apagar, devolve os imóveis
+    dele para o <em>pool</em> da imobiliária (<code>id_usuario</code> vira <code>NULL</code>, a empresa é mantida) e
+    zera o <code>criado_por</code> que apontava para ele.
+  </div>
+</section>
+
+<section class="pagebreak">
+  <h2>5. Regras garantidas pelo banco</h2>
+  <p>Além da validação na API, o PostgreSQL rejeita estados inconsistentes:</p>
+  <table>
+    <thead><tr><th>Objeto</th><th>Regra</th><th>Por quê</th></tr></thead>
+    <tbody>
+      <tr>
+        <td><code>CHECK usuario_empresa_por_tipo</code></td>
+        <td><code>(tipo = 'CORRETOR_INDIVIDUAL' AND id_empresa IS NULL)</code><br><code>OR (tipo IN ('ADMIN','CORRETOR') AND id_empresa IS NOT NULL)</code></td>
+        <td>Autônomo nunca tem empresa; ADMIN e CORRETOR sempre têm.</td>
+      </tr>
+      <tr>
+        <td><code>índice único parcial</code><br><code>usuario_um_admin_por_empresa</code></td>
+        <td><code>UNIQUE (id_empresa) WHERE tipo_usuario = 'ADMIN'</code></td>
+        <td>No máximo um ADMIN por imobiliária.</td>
+      </tr>
+      <tr>
+        <td><code>CHECK usuario_tipo_usuario_check</code></td>
+        <td><code>tipo_usuario IN ('ADMIN','CORRETOR','CORRETOR_INDIVIDUAL')</code></td>
+        <td>Enum <code>TipoUsuario</code> — só valores válidos.</td>
+      </tr>
+      <tr>
+        <td><code>CHECK imovel_tem_posse</code></td>
+        <td><code>id_empresa IS NOT NULL OR id_usuario IS NOT NULL</code></td>
+        <td>Todo imóvel pertence a uma imobiliária, a um corretor, ou aos dois.</td>
+      </tr>
+      <tr>
+        <td><code>UNIQUE</code> em <code>usuario</code></td>
+        <td><code>email</code>, <code>cpf</code>, <code>cnpj</code> (os dois últimos aceitam múltiplos <code>NULL</code>)</td>
+        <td>Sem contas duplicadas.</td>
+      </tr>
+    </tbody>
+  </table>
+</section>
+
+<section>
+  <h2>6. Modelo de dados e posse do imóvel</h2>
+  <div class="grid2">
+    <div class="card">
+      <h3><code>empresa</code></h3>
+      <p class="small"><code>id_empresa</code> · <code>nome</code> · <code>cnpj</code> (único) · <code>telefone?</code> · <code>email?</code></p>
+      <p class="small muted">Uma imobiliária. Tem 0..N <code>usuario</code> e 0..N <code>imovel</code>.</p>
+    </div>
+    <div class="card">
+      <h3><code>usuario</code></h3>
+      <p class="small"><code>id_usuario</code> · <code>nome</code> · <code>email</code> (único) · <code>senha</code> (scrypt) · <code>tipo_usuario</code> · <code>id_empresa?</code> · <code>cpf?</code> · <code>cnpj?</code> · <code>telefone?</code> · <code>data_nasc?</code> · <code>instagram?</code></p>
+      <p class="small muted">Quem faz login. <code>id_empresa</code> nulo só para <code>CORRETOR_INDIVIDUAL</code>.</p>
+    </div>
+  </div>
+  <div class="card" style="margin-top:14px;">
+    <h3><code>imovel</code> — como a posse é representada</h3>
+    <table style="margin:6px 0;">
+      <thead><tr><th>Situação</th><th><code>id_usuario</code></th><th><code>id_empresa</code></th></tr></thead>
+      <tbody>
+        <tr><td>Imóvel de um corretor da imobiliária</td><td>o corretor</td><td>a imobiliária</td></tr>
+        <tr><td>Imóvel da imobiliária (pool, sem corretor)</td><td><code>NULL</code></td><td>a imobiliária</td></tr>
+        <tr><td>Imóvel de corretor autônomo</td><td>o corretor</td><td><code>NULL</code></td></tr>
+      </tbody>
+    </table>
+    <p class="small"><code>criado_por</code> registra quem cadastrou (relevante quando o ADMIN cadastra em nome de um corretor).
+    <code>GET /api/imoveis</code> filtra por papel: ADMIN vê tudo da empresa; corretor (vinculado ou autônomo) vê só o que é seu.</p>
+  </div>
+</section>
+
+<section class="pagebreak">
+  <h2>7. Referência da API</h2>
+  <table>
+    <thead><tr><th>Método / rota</th><th>Acesso</th><th>O que faz</th></tr></thead>
+    <tbody>
+      <tr><td><span class="tag post">POST</span> <code>/api/login</code></td><td>público</td><td>Autentica e abre a sessão (cookie).</td></tr>
+      <tr><td><span class="tag post">POST</span> <code>/api/logout</code></td><td>público</td><td>Limpa o cookie de sessão.</td></tr>
+      <tr><td><span class="tag get">GET</span> <code>/api/me</code></td><td>autenticado</td><td>Dados da sessão: <code>id, nome, email, tipoUsuario, empresaId</code>.</td></tr>
+      <tr><td><span class="tag post">POST</span> <code>/api/registrar</code></td><td>público</td><td>Cria corretor autônomo e já loga.</td></tr>
+      <tr><td><span class="tag post">POST</span> <code>/api/registrar-imobiliaria</code></td><td>público</td><td>Cria imobiliária + ADMIN (transação) e já loga.</td></tr>
+      <tr><td><span class="tag get">GET</span> <code>/api/corretores</code></td><td><span class="tag role">ADMIN</span></td><td>Lista os corretores da imobiliária.</td></tr>
+      <tr><td><span class="tag post">POST</span> <code>/api/corretores</code></td><td><span class="tag role">ADMIN</span></td><td>Cadastra um corretor na empresa do ADMIN.</td></tr>
+      <tr><td><span class="tag patch">PATCH</span> <code>/api/corretores/:id</code></td><td><span class="tag role">ADMIN</span></td><td>Edita nome, telefone e CPF do corretor.</td></tr>
+      <tr><td><span class="tag del">DELETE</span> <code>/api/corretores/:id</code></td><td><span class="tag role">ADMIN</span></td><td>Remove o corretor; imóveis dele voltam ao pool.</td></tr>
+      <tr><td><span class="tag get">GET</span> <code>/api/imoveis</code></td><td>autenticado</td><td>Lista imóveis conforme o papel (ADMIN = empresa; corretor = os seus).</td></tr>
+      <tr><td><span class="tag post">POST</span> <code>/api/imoveis</code></td><td>autenticado</td><td>Cadastra imóvel; posse definida pelo papel de quem cadastra.</td></tr>
+      <tr><td><span class="tag put">PUT</span> <code>/api/imoveis/:id</code></td><td>dono ou <span class="tag role">ADMIN</span> da empresa</td><td>Edita o imóvel; só o ADMIN reatribui a corretor.</td></tr>
+      <tr><td><span class="tag del">DELETE</span> <code>/api/imoveis/:id</code></td><td>dono ou <span class="tag role">ADMIN</span> da empresa</td><td>Exclui o imóvel e suas características.</td></tr>
+      <tr><td><span class="tag get">GET</span> <code>/api/bairros</code> · <code>/api/caracteristicas</code></td><td>autenticado</td><td>Listas de apoio para o formulário de imóvel.</td></tr>
+    </tbody>
+  </table>
+  <p class="small muted">Erros seguem o padrão <code>{ ok: false, error: "mensagem" }</code> com status <code>400/401/403/404/409/500</code>.
+  Sucesso: <code>{ ok: true, ... }</code>.</p>
+</section>
+
+<section>
+  <h2>8. Como rodar e contas de teste</h2>
+  <dl class="kv">
+    <dt>Subir tudo (dev)</dt><dd><code>npm run dev</code> — Vite em <code>:5173</code> (proxy <code>/api</code> &rarr; <code>:3000</code>) + API com <code>tsx watch</code>.</dd>
+    <dt>Popular o banco</dt><dd><code>npm run seed</code> — idempotente.</dd>
+    <dt>Build de produção</dt><dd><code>npm run build</code> &rarr; <code>client/dist</code>, servido por <code>npm start</code>.</dd>
+    <dt>Migrações</dt><dd><code>npx prisma contract emit</code> &rarr; <code>npx prisma db update</code> (fluxo rápido) ou <code>migration plan</code> + <code>db migrate</code>.</dd>
+  </dl>
+  <p>Contas criadas pelo seed (senha <code>senha123</code>):</p>
+  <table>
+    <thead><tr><th>E-mail</th><th>Perfil</th><th>Empresa</th></tr></thead>
+    <tbody>
+      <tr><td><code>admin@demo.com.br</code></td><td><code>ADMIN</code></td><td>Imobiliária Demo</td></tr>
+      <tr><td><code>corretor@demo.com.br</code></td><td><code>CORRETOR</code></td><td>Imobiliária Demo</td></tr>
+      <tr><td><code>autonomo@demo.com.br</code></td><td><code>CORRETOR_INDIVIDUAL</code></td><td>&mdash;</td></tr>
+    </tbody>
+  </table>
+</section>
+
+</body>
+</html>
